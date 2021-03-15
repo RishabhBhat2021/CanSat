@@ -5,7 +5,7 @@ from tkinter import ttk
 
 import matplotlib
 matplotlib.use('TkAgg')  # Backend for matplotlib
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk    # use NavigationToolbar2Tk , instead of NavigationToolbar2TkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import matplotlib.animation as animation
 from matplotlib import style
@@ -56,7 +56,7 @@ def get_data():
                 last_element = ele_list[4]
                 my_list.append(int(last_element))
                 y_list.append(10*int(last_element) + 10*random.randint(-10,10))
-                # print(my_list)
+                
 
 def animate(i):
 
