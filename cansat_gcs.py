@@ -14,7 +14,7 @@ from PIL import ImageTk, Image
 
 import serial
 
-import random
+import pandas as pd
 
 LARGE_FONT = ("Helvetica", 30)
 MEDIUM_FONT = ("Helvetica", 20)
@@ -30,41 +30,76 @@ pressure_plot = fig.add_subplot(224)
 data_to_display = ""
 want_to_read = True
 
-my_list = []
-y_list = []
+altitude_list = []
+temperature_list = []
+speed_list = []
+pressure_list = []
+time_list = []
+
+
+
 
 def get_data():
 
     global data_to_display
     global want_to_read
-    global my_list
-    global y_list
+    global altitude_list
+    global temperature_list
+    global speed_list
+    global pressure_list
+    global time_list
 
     # timeout=0 makes sure the this while loop doesnt block other part of the code  
-    arduinoSerialData = serial.Serial('com7', 9600, timeout=0, writeTimeout=0)  #9600 is the Baudrate
+    arduinoSerialData = serial.Serial('com7', 9600)  #9600 is the Baudrate
 
     while want_to_read == True:
         if (arduinoSerialData.inWaiting()>0):  # Only proceeds when there is something from arduino
             myData = arduinoSerialData.readline()
-            print(myData.decode())
+            # print(myData.decode())
 
             data_to_display = data_to_display + myData.decode()
 
-            ele_list = myData.decode().split(" ")
-            
-            if len(ele_list) > 3:
-                last_element = ele_list[4]
-                my_list.append(int(last_element))
-                y_list.append(10*int(last_element) + 10*random.randint(-10,10))
+            ele_list = myData.decode().strip("\r\n").split(",")
+
+            print(ele_list)
+
+            for element in ele_list:
+                altitude = ele_list[0]
+                temperature = ele_list[1]
+                speed = ele_list[2]
+                pressure = ele_list[3]
+                time = ele_list[4]
+
+                altitude_list.append(altitude)
+                temperature_list.append(temperature)
+                speed_list.append(speed)
+                pressure_list.append(pressure)
+                time_list.append(time)
+
                 
+                dict = {"Altitude": altitude, "Temperature": temperature, "Velocity": speed, "Pressure": pressure, "Time": time}
+
+                data_frame = pd.DataFrame(dict)
+
+                data_frame.to_csv('data.csv')
+
+
 
 def animate(i):
 
-    global my_list
-    global y_list
+    global altitude_list
+    global temperature_list
+    global speed_list
+    global pressure_list
+    global time_list
 
-    xList = my_list
-    yList = y_list
+    arduino_data = pd.read_csv('data.csv')
+
+    altitude = arduino_data["Altitude"]
+    temperature = arduino_data["Temperature"]
+    speed = arduino_data["Velocity"]
+    pressure = arduino_data["Pressure"]
+    time = arduino_data["Time"]
 
     # Clean the plot first
     altitude_plot.clear()  
@@ -72,10 +107,10 @@ def animate(i):
     speed_plot.clear()
     pressure_plot.clear()
 
-    altitude_plot.plot(xList, yList, label="Altitude", color="orange")
-    temperature_plot.plot(xList, yList, label="Temperature", color="navy")
-    speed_plot.plot(xList, yList, label="Speed", color="green")
-    pressure_plot.plot(xList, yList, label="Pressure", color="red")
+    altitude_plot.plot(time, altitude, label="Altitude", color="orange")
+    temperature_plot.plot(time, temperature, label="Temperature", color="navy")
+    speed_plot.plot(time, speed, label="Speed", color="green")
+    pressure_plot.plot(time, pressure, label="Pressure", color="red")
 
     # Showing the Legend for the graphs
     altitude_plot.legend() 
