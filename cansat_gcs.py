@@ -234,8 +234,9 @@ def main():
         # timeout=0 makes sure the this while loop doesnt block other part of the code  
         serial.Serial('com7', 9600, timeout=0, writeTimeout=0)  #9600 is the Baudrate
         
-        thread1 = threading.Thread(target=get_data)
-        thread1.start()
+        thread_arduino = threading.Thread(target=get_data)
+        thread_arduino.daemon = True
+        thread_arduino.start()
 
     except:
         print("Error: Arduino Not Connected")
